@@ -5,3 +5,4 @@ pandas
 google-cloud-bigquery
 db-dtypes
 google-cloud-bigquery-storage
+streamlit-autorefresh
