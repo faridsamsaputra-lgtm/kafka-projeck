@@ -1,20 +1,33 @@
-import time
 import os
+import json
+import time
 from google.cloud import bigquery
 
-client = bigquery.Client.from_service_account_json(
-    "myni-project-dewe-0b136d708a75.json"
-)
+# =============================
+# 🔗 INIT BIGQUERY (STREAMLIT SECRET)
+# =============================
+def init_bq():
+    key = json.loads(os.environ["GOOGLE_CREDENTIALS"])
+    return bigquery.Client.from_service_account_info(key)
+
+client = init_bq()
 
 table_id = "myni-project-dewe.weather_data.weather_stream"
 
+# =============================
+# 🚀 FUNCTION UPLOAD
+# =============================
 def upload():
     try:
-        with open("data.json", "rb") as f:
-            if os.stat("data.json").st_size == 0:
-                print("⚠️ File kosong, skip upload")
-                return
+        if not os.path.exists("data.json"):
+            print("📂 File belum ada")
+            return
 
+        if os.path.getsize("data.json") == 0:
+            print("⚠️ File kosong, skip upload")
+            return
+
+        with open("data.json", "rb") as f:
             job = client.load_table_from_file(
                 f,
                 table_id,
@@ -27,16 +40,17 @@ def upload():
         job.result()
         print("✅ Upload sukses ke BigQuery")
 
-        # reset file setelah sukses
+        # reset file
         open("data.json", "w").close()
 
     except Exception as e:
         print("❌ ERROR UPLOAD:", e)
 
+# =============================
+# 🔄 AUTO LOOP
+# =============================
 print("🚀 AUTO UPLOAD START")
 
 while True:
-    if os.path.exists("data.json"):
-        upload()
-
+    upload()
     time.sleep(60)  # tiap 1 menit
