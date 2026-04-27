@@ -1,0 +1,7 @@
+kafka-python
+requests
+streamlit
+pandas
+google-cloud-bigquery
+db-dtypes
+google-cloud-bigquery-storage
